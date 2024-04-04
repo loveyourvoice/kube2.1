@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: volumes-learn
+  namespace: 21hw
+spec:
+  selector:
+    matchLabels:
+      app: volume-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: volume-app
+    spec:
+      containers:
+        - name: busybox
+          image: busybox:1.28
+          command: ['sh', '-c', 'mkdir -p /volume && while true; do echo "$(date) - Write 5sec" >> /volume/5sec.txt; sleep 5; done']
+          volumeMounts:
+            - name: volume
+              mountPath: /volume
+        - name: multitool
+          image: wbitt/network-multitool
+          command: ['sh', '-c', 'tail -f /volume/5sec.txt']
+          volumeMounts:
+            - name: volume
+              mountPath: /volume
+      volumes:
+        - name: volume
+          emptyDir: {}
